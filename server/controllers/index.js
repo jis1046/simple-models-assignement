@@ -374,30 +374,25 @@ const searchDogName = async (req, res) => {
      Remember that since we are interacting with the database, we want to wrap our code in a
      try/catch in case the database throws an error or doesn't respond.
   */
-     let doc;
+  let doc;
   try {
-  
+    const updatePromise = Dog.findOneAndUpdate({}, { $inc: { age: 1 } }, {
+      returnDocument: 'after', // Populates doc in the .then() with the version after update
+      sort: { createdDate: 'descending' },
+    }).lean().exec();
 
-   const updatePromise = Dog.findOneAndUpdate({}, { $inc: { age: 1 } }, {
-    returnDocument: 'after', // Populates doc in the .then() with the version after update
-    sort: { createdDate: 'descending' },
-  }).lean().exec();
+    // If we successfully save/update them in the database, send back the cat's info.
+    updatePromise.then((doc) => res.json({
+      name: doc.name,
+      breed: doc.breed,
+      age: doc.age,
+    }));
 
-  // If we successfully save/update them in the database, send back the cat's info.
-  updatePromise.then((doc) => res.json({
-    name: doc.name,
-    breed: doc.breed,
-    age: doc.age,
-  }));
+    await updatePromise.catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: 'Something went wrong' });
+    });
 
-  // If something goes wrong saving to the database, log the error and send a message to the client.
-  await updatePromise.catch((err) => {
-    console.log(err);
-    return res.status(500).json({ error: 'Something went wrong' });
-  }); 
-  
-  
- 
     doc = await Dog.findOne({ name: req.query.name }).exec();
   } catch (err) {
     // If there is an error, log it and send the user an error message.
@@ -410,9 +405,8 @@ const searchDogName = async (req, res) => {
     return res.status(404).json({ error: 'No dogs found' });
   }
 
-  
   // Otherwise, we got a result and will send it back to the user.
-  //return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
+  return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
 };
 
 /* A function for updating the last cat added to the database.
