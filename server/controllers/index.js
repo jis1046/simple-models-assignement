@@ -412,7 +412,7 @@ const searchDogName = async (req, res) => {
 
   
   // Otherwise, we got a result and will send it back to the user.
-  return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
+  //return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
 };
 
 /* A function for updating the last cat added to the database.
