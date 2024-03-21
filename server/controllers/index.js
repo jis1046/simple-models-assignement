@@ -376,7 +376,7 @@ const searchDogName = async (req, res) => {
   */
   let doc;
   try {
-    const updatePromise = Dog.findOneAndUpdate({}, { $inc: { age: 1 } }, {
+    const updatePromise = Dog.findOneAndUpdate({ name: req.query.name }, { $inc: { age: 1 } }, {
       returnDocument: 'after', // Populates doc in the .then() with the version after update
       sort: { createdDate: 'descending' },
     }).lean().exec();
